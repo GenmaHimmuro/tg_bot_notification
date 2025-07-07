@@ -1,10 +1,11 @@
 import requests
-from dotenv import load_dotenv
 import os
 import telegram
+import time
+from dotenv import load_dotenv
 
 
-def request_to_dvmn_api(dvmn_token):
+def make_request_to_devman_api(dvmn_token):
     timestamp = None
     headers = {
         "Authorization": f"Token {dvmn_token}"
@@ -33,11 +34,12 @@ def request_to_dvmn_api(dvmn_token):
         except requests.exceptions.ReadTimeout:
             continue
         except ConnectionError:
+            time.sleep(30)
             continue
 
 
 def send_message_from_bot(dvmn_token, chat_id, bot):
-    for lesson_title, is_negative, lesson_url in request_to_dvmn_api(dvmn_token):
+    for lesson_title, is_negative, lesson_url in make_request_to_devman_api(dvmn_token):
         if is_negative:
             is_correct = 'Преподавателю всё понравилось, можно приступать к следующему уроку ✅'
         else:
@@ -49,11 +51,11 @@ def send_message_from_bot(dvmn_token, chat_id, bot):
         bot.send_message(chat_id=chat_id, text=msg)
 
 
-def main ():
+def main():
     load_dotenv()
-    DVMN_TOKEN = os.getenv('DVMN_TOKEN')
-    BOT_TOKEN = os.getenv('TG_BOT_TOKEN')
-    CHAT_ID = os.getenv('CHAT_ID')
+    DVMN_TOKEN = os.environ['DVMN_TOKEN']
+    BOT_TOKEN = os.environ['TG_BOT_TOKEN']
+    CHAT_ID = os.environ['CHAT_ID']
     bot = telegram.Bot(token=BOT_TOKEN)
     send_message_from_bot(dvmn_token=DVMN_TOKEN, chat_id=CHAT_ID, bot=bot)
 
