@@ -5,7 +5,7 @@ import time
 from dotenv import load_dotenv
 
 
-def get_request_to_devman_api(dvmn_token):
+def get_attempt_result(dvmn_token):
     timestamp = None
     headers = {
         "Authorization": f"Token {dvmn_token}"
