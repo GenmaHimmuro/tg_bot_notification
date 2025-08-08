@@ -39,7 +39,7 @@ def get_attempt_result(dvmn_token):
 
 
 def send_message_from_bot(dvmn_token, chat_id, bot):
-    for lesson_title, is_negative, lesson_url in get_request_to_devman_api(dvmn_token):
+    for lesson_title, is_negative, lesson_url in get_attempt_result(dvmn_token):
         if is_negative:
             is_correct = 'Преподавателю всё понравилось, можно приступать к следующему уроку ✅'
         else:
