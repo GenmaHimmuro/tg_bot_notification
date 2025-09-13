@@ -3,6 +3,12 @@ import os
 import telegram
 import time
 from dotenv import load_dotenv
+import logging
+
+
+def send_crash_notification(admin_chat_id, message, bot, logger):
+    bot.send_message(chat_id=admin_chat_id, text=message)
+    logger.info(f"Уведомление о сбое отправлено: {message}")
 
 
 def get_attempt_result(dvmn_token):
@@ -56,8 +62,31 @@ def main():
     DVMN_TOKEN = os.environ['DVMN_TOKEN']
     BOT_TOKEN = os.environ['TG_BOT_TOKEN']
     CHAT_ID = os.environ['CHAT_ID']
+    ADMIN_CHAT_ID = os.environ['ADMIN_CHAT_ID']
     bot = telegram.Bot(token=BOT_TOKEN)
-    send_message_from_bot(dvmn_token=DVMN_TOKEN, chat_id=CHAT_ID, bot=bot)
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.StreamHandler()
+        ]
+    )
+    logger = logging.getLogger(__name__)
+
+    while True:
+        try:
+            logger.info("Бот запустился...")
+            send_message_from_bot(dvmn_token=DVMN_TOKEN, chat_id=CHAT_ID, bot=bot)
+        except Exception as e:
+            error_message = f"Бот упал в {time.strftime('%Y-%m-%d %H:%M:%S')}: {str(e)}"
+            logger.error(error_message)
+            try:
+                send_crash_notification(ADMIN_CHAT_ID, error_message, bot, logger)
+            except Exception as notify_error:
+                logger.error(f"Не удалось отправить уведомление о сбое: {str(notify_error)}")
+            time.sleep(60)
+            continue
 
 
 if __name__ == "__main__":
