@@ -60,10 +60,12 @@ def send_message_from_bot(dvmn_token, chat_id, bot):
 def main():
     load_dotenv()
     DVMN_TOKEN = os.environ['DVMN_TOKEN']
-    BOT_TOKEN = os.environ['TG_BOT_TOKEN']
+    NOTIFICATION_BOT_TOKEN = os.environ['NOTIFICATION_BOT_TOKEN']
+    ALLERT_BOT_TOKEN = os.environ['ALLERT_BOT_TOKEN']
     CHAT_ID = os.environ['CHAT_ID']
     ADMIN_CHAT_ID = os.environ['ADMIN_CHAT_ID']
-    bot = telegram.Bot(token=BOT_TOKEN)
+    notification_bot = telegram.Bot(token=NOTIFICATION_BOT_TOKEN)
+    alert_bot = telegram.Bot(token=ALLERT_BOT_TOKEN)
 
     logging.basicConfig(
         level=logging.INFO,
@@ -77,12 +79,12 @@ def main():
     while True:
         try:
             logger.info("Бот запустился...")
-            send_message_from_bot(dvmn_token=DVMN_TOKEN, chat_id=CHAT_ID, bot=bot)
+            send_message_from_bot(dvmn_token=DVMN_TOKEN, chat_id=CHAT_ID, bot=notification_bot)
         except Exception as e:
             error_message = f"Бот упал в {time.strftime('%Y-%m-%d %H:%M:%S')}: {str(e)}"
             logger.error(error_message)
             try:
-                send_crash_notification(ADMIN_CHAT_ID, error_message, bot, logger)
+                send_crash_notification(ADMIN_CHAT_ID, error_message, alert_bot, logger)
             except Exception as notify_error:
                 logger.error(f"Не удалось отправить уведомление о сбое: {str(notify_error)}")
             time.sleep(60)
